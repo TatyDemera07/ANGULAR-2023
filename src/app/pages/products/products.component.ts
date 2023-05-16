@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CreateProductDto, ProductModel, UpdateProductDto } from 'src/app/models/product.model';
 import { ProductService } from 'src/app/services/product.service';
+import { HttpClient as HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-product',
@@ -8,14 +9,23 @@ import { ProductService } from 'src/app/services/product.service';
   styleUrls: ['./products.component.css']
 })
 export class ProductsComponent implements OnInit {
+  httpClient: any;
    products:ProductModel[] = [];
-
    selectedProduct: UpdateProductDto = {title:'', price:0, description:''};
-
+  productsServices: any;
   constructor(private productService:ProductService) {
-   this.editProduct();
   }
-  
+  privateProductId=0
+
+  dataBody={
+    title: '',
+    price:0,
+    description:''
+  }
+  initProduct(){
+    this.selectedProduct = {title: '', price: 0, description:''};
+  }
+
   ngOnInit(): void {
     this.getProducts();
     //this.getProduct();
@@ -24,48 +34,61 @@ export class ProductsComponent implements OnInit {
     //this.deleteProduct();
   }
 
-  getProducts(){
-    const url = "https://api.escuelajs.co/api/v1/products";
-    this.productService.getAll().subscribe(
-      response =>{
+  getProducts() {
+    this.productService.getAll().subscribe
+      (response => {
         this.products = response;
-        console.log(response);
-      }
-    )
+        //console.log(response)
+      });
   }
-  getProduct(id: ProductModel['id'] ){
-    const url = "https://api.escuelajs.co/api/v1/products/id";
-    return this.productService.getOne(id).subscribe(
-      response =>{
-        console.log(response);
-      }
-    )
+  getProduct() {
+    const url = 'http://api.escuelajs.co/api/v1/products/20';
+    this.productService.getOne(2).subscribe
+      (response => {
+        console.log(response)
+      });
   }
-  createProduct(product: CreateProductDto){
-    this.productService.store(product).subscribe(
-      response =>{
-        console.log(response);
-      }
-    )
+  createProduct() {
+    const data = {
+      title: "Zapatos",
+      price: 25,
+      description: "Deportivos / Tatiana Demera",
+      images: ['https://m.media-amazon.com/images/I/41lL4RYD-PL._SL500_.jpg'],
+      categoryId: 1,
+    }
+    const url = 'http://api.escuelajs.co/api/v1/products';
+    this.productsServices.store(data).subscribe
+      ((response: any) => {
+        console.log(response)
+      });
   }
-  updateProduct(id: ProductModel['id'], product:UpdateProductDto){
-    this.productService.update(id, product).subscribe(
-      response =>{
-        console.log(response);
-      }
-    )
+  updateProduct() {
+    const data = {
+      // title: "Camisetas",
+      // price: 15,
+      // description: "Deportivos / Tatiana Demera",
+      // images: ['https://m.media-amazon.com/images/I/41lL4RYD-PL._SL500_.jpg'],
+      // categoryId: 1
+      ...this.selectedProduct,
+      ...this.dataBody
+    }
+    console.log(data)
+    //const url = 'http://api.escuelajs.co/api/v1/products/226';
+    this.productService.update(this.privateProductId, data).subscribe(response => {
+      console.log('hola')
+    });
   }
-  editProduct(){
-    this.selectedProduct = {title:'', price:0, description:''};
-  }
-  
   deleteProduct(id: ProductModel['id']){
     this.productService.destroy(id).subscribe(
       response =>{
         this.products = this.products.filter(product => product.id != id); 
         console.log(response);
       }
-    )
+    );
+  }
+  editProduct(product:ProductModel){
+    this.selectedProduct = product;
+    this.privateProductId=product.id
   }
 }
 
